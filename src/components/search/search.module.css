@@ -1,0 +1,32 @@
+.container {
+  width: 40dvw;
+  min-width: 200px;
+}
+
+.wrapper {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 2.5rem;
+  padding: 0 15px;
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 0 8px #ddd;
+  gap: 10px;
+}
+
+.wrapper > input {
+  background-color: transparent;
+  border: none;
+  width: 100%;
+  height: 100%;
+  font-size: 1.25rem;
+}
+
+.wrapper > input:focus {
+  outline: none;
+}
+
+.wrapper > span {
+  font-size: 1.25rem;
+}
