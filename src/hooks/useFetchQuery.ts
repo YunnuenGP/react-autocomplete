@@ -1,52 +1,55 @@
-import { useEffect, useState, useRef } from 'react';
-const LIMIT = 5;
-export const useFetchQuery = () => {
-  const queryMap = useRef(new Map());
-  const [query, setQuery] = useState<string>();
-  const [data, setData] = useState<Array<unknown>>([]);
+import { useEffect, useState, useRef } from "react";
+import { fetchSearchProducts, Product } from "../api/products";
+
+export const useQueryProducts = () => {
+  const [products, setProducts] = useState<Array<Product>>([]);
+  const [error, setError] = useState<Error>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [query, setQuery] = useState("");
+  const queryMap = useRef(new Map());
 
   useEffect(() => {
-    const getDataFromQuery = async (_query: string, controller: AbortController) => {
+    const getDataFromQuery = async (
+      _query: string,
+      controller: AbortController
+    ) => {
       try {
-        console.log('Fetching data');
-        const { signal } = controller;
-        const response = await fetch(
-          `https://dummyjson.com/products/search?q=${_query}&limit=${LIMIT}`,
-          {
-            signal,
-          },
-        );
-        const { products } = await response.json();
+        console.log("Fetching data");
+
+        const products = await fetchSearchProducts(_query, controller);
 
         queryMap.current.set(_query, products);
-        setData(products);
+        setProducts(products);
       } catch (err) {
         if (err instanceof Error) {
-          console.error(err.message);
+          setError(err);
         }
       } finally {
         setIsLoading(false);
       }
     };
 
+    const _query = query.trim().toLocaleLowerCase();
     let controller: AbortController | null = null;
     let timeoutId = 0;
 
-    if (!query?.trim()) {
-      setData([]);
-    } else if (queryMap.current.has(query)) {
-      console.log('Getting data from cache');
-      setData(queryMap.current.get(query));
+    if (!_query) {
+      setProducts([]);
+    } else if (queryMap.current.has(_query)) {
+      console.log("Getting data from cache");
+      setProducts(queryMap.current.get(_query));
     } else {
       setIsLoading(true);
       controller = new AbortController();
-      timeoutId = setTimeout(getDataFromQuery.bind(null, query, controller), 250); // debounce
+      timeoutId = setTimeout(
+        getDataFromQuery.bind(null, _query, controller),
+        250
+      ); // debounce
     }
 
     return () => {
       if (isLoading) {
-        console.log('- - - - ABORTING - - - -');
+        console.log("- - - - ABORTING - - - -");
         clearTimeout(timeoutId);
         controller?.abort();
         setIsLoading(false);
@@ -54,5 +57,5 @@ export const useFetchQuery = () => {
     };
   }, [query]);
 
-  return { data, isLoading, fetchQuery: setQuery };
+  return { products, isLoading, fetchQuery: setQuery, error };
 };

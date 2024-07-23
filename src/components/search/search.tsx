@@ -1,20 +1,20 @@
-import { useFetchQuery } from '../../hooks/useFetchQuery';
-import { SearchBar } from './search-bar';
-import styles from './search.module.css';
+import { useQueryProducts } from "../../hooks/useFetchQuery";
+import { SearchBar } from "./search-bar";
+import styles from "./search.module.css";
 
 export const Search = () => {
-  const { fetchQuery, data, isLoading } = useFetchQuery();
-  console.log(data);
+  const { fetchQuery, products, isLoading, error } = useQueryProducts();
+  console.log(isLoading);
+  console.log(products);
+  console.log(error?.message);
   return (
     <section className={styles.container}>
-      <SearchBar
-        handleOnChange={(query: string) => {
-          fetchQuery(query);
-        }}
-      />
+      <SearchBar handleOnChange={fetchQuery} />
       <ul>
-        {data.map((p) => (
-          <li>{p.title}</li>
+        {products.map((p) => (
+          <li key={p.id}>
+            {p.id} - {p.title} - {p.description}
+          </li>
         ))}
       </ul>
     </section>
