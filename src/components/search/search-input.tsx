@@ -1,6 +1,8 @@
 import styles from './search.module.css';
 
-export const SearchInput = ({ handleOnChange }: { handleOnChange: (query: string) => void }) => {
+export const SearchInput: React.FC<{ handleOnChange: (query: string) => void }> = ({
+  handleOnChange,
+}) => {
   return (
     <div role="presentation" className={styles.wrapper}>
       <span>🔍</span>
