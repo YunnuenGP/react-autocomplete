@@ -1,20 +1,17 @@
-import { useEffect, useState, useRef } from "react";
-import { fetchSearchProducts, Product } from "../api/products";
+import { useEffect, useState, useRef } from 'react';
+import { fetchSearchProducts, Product } from '../api/products';
 
 export const useQueryProducts = () => {
   const [products, setProducts] = useState<Array<Product>>([]);
   const [error, setError] = useState<Error>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState('');
   const queryMap = useRef(new Map());
 
   useEffect(() => {
-    const getDataFromQuery = async (
-      _query: string,
-      controller: AbortController
-    ) => {
+    const getDataFromQuery = async (_query: string, controller: AbortController) => {
       try {
-        console.log("Fetching data");
+        console.log('Fetching data');
 
         const products = await fetchSearchProducts(_query, controller);
 
@@ -23,33 +20,31 @@ export const useQueryProducts = () => {
       } catch (err) {
         if (err instanceof Error) {
           setError(err);
+          setProducts([]);
         }
       } finally {
         setIsLoading(false);
       }
     };
 
-    const _query = query.trim().toLocaleLowerCase();
+    const _query = query.toLocaleLowerCase();
     let controller: AbortController | null = null;
     let timeoutId = 0;
 
     if (!_query) {
       setProducts([]);
     } else if (queryMap.current.has(_query)) {
-      console.log("Getting data from cache");
+      console.log('Getting data from cache');
       setProducts(queryMap.current.get(_query));
     } else {
       setIsLoading(true);
       controller = new AbortController();
-      timeoutId = setTimeout(
-        getDataFromQuery.bind(null, _query, controller),
-        250
-      ); // debounce
+      timeoutId = setTimeout(getDataFromQuery.bind(null, _query, controller), 250); // debounce
     }
 
     return () => {
       if (isLoading) {
-        console.log("- - - - ABORTING - - - -");
+        console.log('- - - - ABORTING - - - -');
         clearTimeout(timeoutId);
         controller?.abort();
         setIsLoading(false);
@@ -57,5 +52,5 @@ export const useQueryProducts = () => {
     };
   }, [query]);
 
-  return { products, isLoading, fetchQuery: setQuery, error };
+  return { products, query, fetchQuery: setQuery, isLoading, error };
 };
